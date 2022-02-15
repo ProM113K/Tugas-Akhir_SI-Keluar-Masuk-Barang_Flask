@@ -4,11 +4,17 @@ app = Flask(__name__)
 
 
 @app.route('/')
+@app.route('/BRICASH-APP/Dashboard')
 def home_page():
     return render_template('dashboard.html')
 
 
-@app.route('/QualityControl')
+@app.route('/BRICASH-APP/Auth')
+def login_page():
+    return render_template('login.html')
+
+
+@app.route('/BRICASH-APP/BarangMasuk')
 def barang_masuk_page():
     return render_template('barang_masuk.html')
 
