@@ -77,5 +77,12 @@ def barang_keluar_page():
     return render_template('barang_keluar.html')
 
 
+@app.route('/BRICASH-APP/Report')
+def report_page():
+    if not session.get('username'):
+        return redirect(url_for('login_page'))
+    return 'Halaman report'
+
+
 if __name__ == '__main__':
     app.run(host="localhost", port=3200, debug=True)

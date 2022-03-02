@@ -11,7 +11,7 @@ Barang Masuk
 {% block content %}
 <div class="container mt-4 bg-dark rounded">
     <div class="container text-white p-3">
-        PENERIMAAN BARANG MASUK |
+        PENCATATAN BARANG MASUK |
         <button class="btn btn-info btn-sm text-white" data-bs-toggle="modal" data-bs-target="#addModal">Add <i
                 class="fa fa-plus"></i></button>
         <button class="btn btn-info btn-sm text-white" data-bs-toggle="modal" data-bs-target="#addMultipleModal">Add
@@ -26,6 +26,10 @@ Barang Masuk
                     </div>
                     <div class="modal-body">
                         <form>
+                            <div class="mb-3">
+                                <label for="date-achieve" class="col-form-label">Tanggal Terima Barang</label>
+                                <input type="date" class="form-control" id="date-achieve">
+                            </div>
                             <div class="mb-3">
                                 <label for="recipient-name" class="col-form-label">Recipient:</label>
                                 <input type="text" class="form-control" id="recipient-name">
