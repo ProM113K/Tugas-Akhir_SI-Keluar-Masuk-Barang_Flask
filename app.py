@@ -63,6 +63,13 @@ def logout():
     return redirect(url_for('login_page'))
 
 
+@app.route('/BRICASH-APP/DataCenter')
+def data_center():
+    if not session.get('username'):
+        return redirect(url_for('login_page'))
+    return render_template('pusat_data.html')
+
+
 @app.route('/BRICASH-APP/BarangMasuk')
 def barang_masuk_page():
     if not session.get('username'):
