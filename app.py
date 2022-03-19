@@ -66,7 +66,7 @@ def logout():
 @app.route('/BRICASH-APP/DataCenter', methods=['GET', 'POST'])
 def data_center():
     # Show data
-    sql_show = "SELECT * FROM sparepart ORDER BY sparepart_name ASC"
+    sql_show = "SELECT * FROM sparepart ORDER BY date_createAt DESC"
 
     cursor_show = conn.cursor()
     cursor_show.execute(sql_show)
@@ -81,8 +81,8 @@ def data_center():
     _sparepartCode = request.values.get("sparepart_code")
 
     if request.method == "POST":
-        sql_insert = "INSERT INTO sparepart VALUES (null, %s, %s, %s, %s, %s)"
-        data = (_sparepartName, _machineType, _brand, _machineSeries, _sparepartCode)
+        sql_insert = "INSERT INTO sparepart VALUES (null, %s, %s, %s, %s, %s, NOW())"
+        data = (_sparepartName, _machineType.upper(), _brand.upper(), _machineSeries.upper(), _sparepartCode.upper())
 
         cursor = conn.cursor()
         cursor.execute(sql_insert, data)
