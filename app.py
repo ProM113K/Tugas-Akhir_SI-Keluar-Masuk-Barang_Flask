@@ -81,7 +81,7 @@ def data_center():
     _sparepartCode = request.values.get("sparepart_code")
 
     if request.method == "POST":
-        sql_insert = "INSERT INTO sparepart VALUES (null, %s, %s, %s, %s, %s, NOW())"
+        sql_insert = "INSERT INTO sparepart VALUES (null, %s, %s, %s, %s, %s, null)"
         data = (_sparepartName, _machineType.upper(), _brand.upper(), _machineSeries.upper(), _sparepartCode.upper())
 
         cursor = conn.cursor()
