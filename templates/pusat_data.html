@@ -9,12 +9,12 @@ Pusat Data
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <!--Add Sparepart here-->
-    <div class="container-fluid">
+<div class="container-fluid d-flex">
+    <!--Sparepart Area-->
+    <div class="container border mx-2 my-5 shadow p-3 mb-5 bg-body rounded">
         <!-- Button add spareparts-->
-        <button class="btn btn-success btn-sm text-white my-3 float-end" data-bs-toggle="modal"
-            data-bs-target="#addModal">Add Sparepart <i class="fa fa-plus"></i></button>
+        <button class="btn btn-success btn-sm text-white my-3 float-end" title="Tambah data sparepart baru"
+            data-bs-toggle="modal" data-bs-target="#addModal">Tambah Sparepart <i class="fa fa-plus"></i></button>
 
         <!-- Modal add spareparts -->
         <div class="modal fade text-dark" id="addModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -22,35 +22,35 @@ Pusat Data
             <div class="modal-dialog modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Add/Edit Data</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Tambah Data</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form method="post">
+                        <form action="/BRICASH-APP/DataCenter/AddSparepart" method="post">
                             <div class="mb-3">
                                 <label for="sparepart-name" class="col-form-label">Nama Sparepart</label>
-                                <input type="text" class="form-control" name="sparepart_name" id="sparepart-name">
+                                <input type="text" class="form-control" name="sparepart_name" id="sparepart-name" maxlength="40">
                             </div>
                             <div class="mb-3">
                                 <label for="machine-type" class="col-form-label">Tipe Mesin</label>
-                                <input type="text" class="form-control" name="machine_type" id="machine-type">
+                                <input type="text" class="form-control" name="machine_type" id="machine-type" maxlength="10">
                             </div>
                             <div class="mb-3">
                                 <label for="brand" class="col-form-label">Brand</label>
-                                <input type="text" class="form-control" name="brand" id="brand">
+                                <input type="text" class="form-control" name="brand" id="brand" maxlength="20">
                             </div>
                             <div class="mb-3">
                                 <label for="machine-series" class="col-form-label">Seri Mesin</label>
-                                <input type="text" class="form-control" name="machine_series" id="machine-series">
+                                <input type="text" class="form-control" name="machine_series" id="machine-series" maxlength="20">
                             </div>
                             <div class="mb-3">
                                 <label for="sparepart-code" class="col-form-label">Kode Sparepart</label>
-                                <input type="text" class="form-control" name="sparepart_code" id="sparepart-code">
+                                <input type="text" class="form-control" name="sparepart_code" id="sparepart-code" maxlength="10">
                             </div>
                     </div>
                     <div class="modal-footer">
-                        <input type="submit" class="btn btn-success" value="Save">
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+                        <input type="submit" class="btn btn-success" value="Simpan">
                     </div>
                     </form>
                 </div>
@@ -59,7 +59,7 @@ Pusat Data
         <!--End Add Sparepart here-->
 
         <!-- Data Table -->
-        <table class="table table-dark table-striped w-100 p-3">
+        <table class="table table-dark table-striped p-3">
             <thead>
                 <tr>
                     <th scope="col" hidden>ID</th>
@@ -68,7 +68,7 @@ Pusat Data
                     <th scope="col">Brand</th>
                     <th scope="col">Seri Mesin</th>
                     <th scope="col">Kode Sparepart</th>
-                    <th scope="col">Action</th>
+                    <th scope="col">Opsi</th>
                 </tr>
             </thead>
             <tbody>
@@ -108,7 +108,7 @@ Pusat Data
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary"
                                             data-bs-dismiss="modal">Batal</button>
-                                        <a href="/BRICASH-APP/DataCenter/Delete/{{ spareparts[0] }}"><button
+                                        <a href="/BRICASH-APP/DataCenter/DeleteSparepart/{{ spareparts[0] }}"><button
                                                 type="button" class="btn btn-danger">Hapus
                                             </button></a>
                                     </div>
@@ -127,7 +127,7 @@ Pusat Data
                                             aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form method="post">
+                                        <form action="/BRICASH-APP/DataCenter/UpdateSparepart/{{ spareparts[0] }}" method="post">
                                             <div class="form-group" hidden>
                                                 <label class="col-form-label">ID:</label>
                                                 <input class="form-control" name="temp_id" type="text"
@@ -137,35 +137,125 @@ Pusat Data
                                                 <label for="sparepart-name" class="col-form-label">Nama
                                                     Sparepart</label>
                                                 <input type="text" class="form-control" name="sparepart_name"
-                                                    id="sparepart-name" value="{{ spareparts[1] }}">
+                                                    id="sparepart-name" value="{{ spareparts[1] }}" maxlength="40">
                                             </div>
                                             <div class="mb-3">
                                                 <label for="machine-type" class="col-form-label">Tipe Mesin</label>
                                                 <input type="text" class="form-control" name="machine_type"
-                                                    id="machine-type" value="{{ spareparts[2] }}">
+                                                    id="machine-type" value="{{ spareparts[2] }}" maxlength="10">
                                             </div>
                                             <div class="mb-3">
                                                 <label for="brand" class="col-form-label">Brand</label>
                                                 <input type="text" class="form-control" name="brand" id="brand"
-                                                    value="{{ spareparts[3] }}">
+                                                    value="{{ spareparts[3] }}" maxlength="20">
                                             </div>
                                             <div class=" mb-3">
                                                 <label for="machine-series" class="col-form-label">Seri Mesin</label>
                                                 <input type="text" class="form-control" name="machine_series"
-                                                    id="machine-series" value="{{ spareparts[4] }}">
+                                                    id="machine-series" value="{{ spareparts[4] }}" maxlength="20">
                                             </div>
                                             <div class=" mb-3">
                                                 <label for="sparepart-code" class="col-form-label">Kode
                                                     Sparepart</label>
                                                 <input type="text" class="form-control" name="sparepart_code"
-                                                    id="sparepart-code" value="{{ spareparts[5] }}">
+                                                    id="sparepart-code" value="{{ spareparts[5] }}" maxlength="10">
                                             </div>
                                             <div class=" modal-footer">
                                                 <button type="button" class="btn btn-danger"
                                                     data-bs-dismiss="modal">Batal</button>
-                                                <a href="/BRICASH-APP/DataCenter/Update/{{ spareparts[0] }}"><button
-                                                        type="button" class="btn btn-success">Simpan
-                                                    </button></a>
+                                                <input type="submit" class="btn btn-success" value="Simpan">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!--Vendor Area-->
+    <div class="container border mx-2 w-75 my-5 shadow p-3 mb-5 bg-body rounded">
+        <!-- Button add vendor-->
+        <button class="btn btn-info btn-sm text-white my-3 float-end" title="Tambah data vendor baru"
+            data-bs-toggle="modal" data-bs-target="#addModalVendor">Tambah Vendor <i class="fa fa-plus"></i></button>
+
+        <!-- Modal add vendor -->
+        <div class="modal fade text-dark" id="addModalVendor" data-bs-backdrop="static" data-bs-keyboard="false"
+            tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Tambah Data</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/BRICASH-APP/DataCenter/TambahVendor" method="post">
+                            <div class="mb-3">
+                                <label for="vendor-name" class="col-form-label">Nama Vendor</label>
+                                <input type="text" class="form-control" name="vendor_name" id="vendor-name" maxlength="50">
+                            </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+                        <input type="submit" class="btn btn-success" value="Simpan">
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!--End Add vendor here-->
+
+        <!-- Data Table -->
+        <table class="table table-dark table-striped p-3">
+            <thead>
+                <tr>
+                    <th scope="col" hidden>ID</th>
+                    <th scope="col">Nama Vendor</th>
+                    <th scope="col">Opsi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vendor in vendor_data %}
+                <tr>
+                    <td hidden>{{ vendor[0] }}</td>
+                    <td>{{ vendor[1] }}</td>
+                    <td>
+                        <!-- Button edit modal -->
+                        <button type="button" class="btn btn-sm btn-outline btn-warning" data-bs-toggle="modal"
+                            data-bs-target="#editModalVendor-{{ vendor[0] }}">
+                            <i class="fa fa-edit"></i></button>
+
+                        <!-- Modal Edit -->
+                        <div class="modal fade text-dark" data-bs-backdrop="static" data-bs-keyboard="false"
+                            id="editModalVendor-{{ vendor[0] }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title text-dark" id="modalEditData">Edit data</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="/BRICASH-APP/DataCenter/UpdateVendor/{{ vendor[0] }}" method="post">
+                                            <div class="form-group" hidden>
+                                                <label class="col-form-label">ID:</label>
+                                                <input class="form-control" name="temp_id" type="text"
+                                                    value="{{ vendor[0] }}">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="vendor-name" class="col-form-label">Nama
+                                                    Sparepart</label>
+                                                <input type="text" class="form-control" name="vendor_name"
+                                                    id="vendor-name" value="{{ vendor[1] }}" maxlength="50">
+                                            </div>
+                                            <div class=" modal-footer">
+                                                <button type="button" class="btn btn-danger"
+                                                    data-bs-dismiss="modal">Batal</button>
+                                                <input type="submit" class="btn btn-success" value="Simpan">
                                             </div>
                                         </form>
                                     </div>

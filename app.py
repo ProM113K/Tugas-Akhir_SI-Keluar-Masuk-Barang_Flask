@@ -65,24 +65,40 @@ def logout():
 
 @app.route('/BRICASH-APP/DataCenter', methods=['GET', 'POST'])
 def data_center():
-    # Show data
-    sql_show = "SELECT * FROM sparepart ORDER BY date_createAt DESC"
+    # Show data sparepart
+    sql_show_sparepart = "SELECT * FROM sparepart ORDER BY date_createAt DESC"
 
     cursor_show = conn.cursor()
-    cursor_show.execute(sql_show)
-
+    cursor_show.execute(sql_show_sparepart)
     sparepart_data = cursor_show.fetchall()
 
-    # Insert data
-    _sparepartName = request.values.get("sparepart_name")
-    _machineType = request.values.get("machine_type")
-    _brand = request.values.get("brand")
-    _machineSeries = request.values.get("machine_series")
-    _sparepartCode = request.values.get("sparepart_code")
+    # Show data vendor
+    sql_show_vendor = "SELECT * FROM vendor ORDER BY vendor_name ASC"
 
-    if request.method == "POST":
+    cursor_show = conn.cursor()
+    cursor_show.execute(sql_show_vendor)
+    vendor_data = cursor_show.fetchall()
+
+    if not session.get('username'):
+        return redirect(url_for('login_page'))
+    else:
+        return render_template('pusat_data.html', sparepart_data=sparepart_data, vendor_data=vendor_data)
+
+
+@app.route("/BRICASH-APP/DataCenter/AddSparepart", methods=["GET", "POST"])
+def add_data_sparepart():
+    if not session.get('username'):
+        return redirect(url_for('login_page'))
+    else:
+        # Insert data sparepart
+        _sparepartName = request.values.get("sparepart_name")
+        _machineType = request.values.get("machine_type")
+        _brand = request.values.get("brand")
+        _machineSeries = request.values.get("machine_series")
+        _sparepartCode = request.values.get("sparepart_code")
+
         sql_insert = "INSERT INTO sparepart VALUES (null, %s, %s, %s, %s, %s, null)"
-        data = (_sparepartName, _machineType.upper(), _brand.upper(), _machineSeries.upper(), _sparepartCode.upper())
+        data = (_sparepartName.upper(), _machineType.upper(), _brand.upper(), _machineSeries.upper(), _sparepartCode.upper())
 
         cursor = conn.cursor()
         cursor.execute(sql_insert, data)
@@ -90,13 +106,8 @@ def data_center():
 
         return redirect(url_for('data_center'))
 
-    if not session.get('username'):
-        return redirect(url_for('login_page'))
-    else:
-        return render_template('pusat_data.html', sparepart_data=sparepart_data)
 
-
-@app.route("/BRICASH-APP/DataCenter/Delete/<_id>")
+@app.route("/BRICASH-APP/DataCenter/DeleteSparepart/<_id>")
 def delete_data_sparepart(_id):
     sql = "DELETE FROM sparepart WHERE id_sparepart = %s"
 
@@ -106,6 +117,58 @@ def delete_data_sparepart(_id):
     conn.commit()
 
     return redirect(url_for("data_center"))
+
+
+@app.route("/BRICASH-APP/DataCenter/UpdateSparepart/<_id>", methods=['GET', 'POST'])
+def update_data_sparepart(_id):
+    # Update data
+    _idTemp = request.values.get('temp_id')
+    _sparepartName = request.values.get("sparepart_name")
+    _machineType = request.values.get("machine_type")
+    _brand = request.values.get("brand")
+    _machineSeries = request.values.get("machine_series")
+    _sparepartCode = request.values.get("sparepart_code")
+
+    sql = "UPDATE sparepart SET sparepart_name=%s, machine_type=%s, brand=%s, machine_series=%s, kd_sparepart=%s WHERE id_sparepart=%s"
+    update_data = (_sparepartName.upper(), _machineType.upper(), _brand.upper(), _machineSeries.upper(), _sparepartCode.upper(), _idTemp)
+    cursor_update = conn.cursor()
+    cursor_update.execute(sql, update_data)
+    conn.commit()
+
+    return redirect(url_for('data_center'))
+
+
+@app.route("/BRICASH-APP/DataCenter/TambahVendor", methods=['GET', 'POST'])
+def add_data_vendor():
+    if not session.get('username'):
+        return redirect(url_for('login_page'))
+    else:
+        # Insert data vendor
+        _vendorName = request.values.get("vendor_name")
+
+        sql_insert = "INSERT INTO vendor VALUES (null, %s)"
+        data = (_vendorName.upper())
+
+        cursor = conn.cursor()
+        cursor.execute(sql_insert, data)
+        conn.commit()
+
+        return redirect(url_for('data_center'))
+
+
+@app.route("/BRICASH-APP/DataCenter/UpdateVendor/<_id>", methods=['GET', 'POST'])
+def update_data_vendor(_id):
+    # Update data
+    _idTemp = request.values.get('temp_id')
+    _vendorName = request.values.get("vendor_name")
+
+    sql = "UPDATE vendor SET vendor_name=%s WHERE id_vendor=%s"
+    update_data = (_vendorName, _idTemp)
+    cursor_update = conn.cursor()
+    cursor_update.execute(sql, update_data)
+    conn.commit()
+
+    return redirect(url_for('data_center'))
 
 
 @app.route('/BRICASH-APP/BarangMasuk')
