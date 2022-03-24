@@ -1,3 +1,5 @@
+import math
+
 from flask import Flask, render_template, url_for, request, session, redirect, flash
 from flaskext.mysql import MySQL
 
@@ -26,7 +28,8 @@ conn = mysql.connect()
 def home_page():
     if not session.get('username'):
         return redirect(url_for('login_page'))
-    return render_template('dashboard.html')
+    else:
+        return render_template('dashboard.html')
 
 
 @app.route('/BRICASH-APP/Auth', methods=['GET', 'POST'])
@@ -54,7 +57,8 @@ def login_page():
     if 'username' in session:
         username = session['username']
         return redirect(url_for('home_page', username=username))
-    return render_template('login.html')
+    else:
+        return render_template('login.html')
 
 
 @app.route('/BRICASH-APP/Auth/Logout')
@@ -63,26 +67,56 @@ def logout():
     return redirect(url_for('login_page'))
 
 
-@app.route('/BRICASH-APP/DataCenter', methods=['GET', 'POST'])
-def data_center():
-    # Show data sparepart
-    sql_show_sparepart = "SELECT * FROM sparepart ORDER BY date_createAt DESC"
+@app.route('/BRICASH-APP/DataCenter/Sparepart', methods=['GET'], defaults={'page': 1})
+@app.route('/BRICASH-APP/DataCenter/Sparepart/Page/<int:page>')
+def data_center_sparepart(page):
+    # Pagination
+    limit = 10
+    offset = page * limit - limit
 
+    cursor_page = conn.cursor()
+    cursor_page.execute("SELECT * FROM sparepart")
+    total_row = cursor_page.rowcount
+    total_page = math.ceil(total_row / limit)
+
+    _next = page + 1
+    _prev = page - 1
+
+    # Show data sparepart
     cursor_show = conn.cursor()
-    cursor_show.execute(sql_show_sparepart)
+    cursor_show.execute("SELECT * FROM sparepart ORDER BY date_createAt DESC LIMIT %s OFFSET %s", (limit, offset))
     sparepart_data = cursor_show.fetchall()
 
-    # Show data vendor
-    sql_show_vendor = "SELECT * FROM vendor ORDER BY vendor_name ASC"
+    if not session.get('username'):
+        return redirect(url_for('login_page'))
+    else:
+        return render_template('pusat_data_sparepart.html', sparepart_data=sparepart_data, page=total_page, next=_next, prev=_prev)
 
+
+@app.route('/BRICASH-APP/DataCenter/Vendor', methods=['GET'], defaults={'page': 1})
+@app.route('/BRICASH-APP/DataCenter/Vendor/Page/<int:page>')
+def data_center_vendor(page):
+    # Pagination
+    limit = 10
+    offset = page * limit - limit
+
+    cursor_page = conn.cursor()
+    cursor_page.execute("SELECT * FROM vendor")
+    total_row = cursor_page.rowcount
+    total_page = math.ceil(total_row / limit)
+
+    _next = page + 1
+    _prev = page - 1
+
+    # Show data vendor
     cursor_show = conn.cursor()
-    cursor_show.execute(sql_show_vendor)
+    cursor_show.execute("SELECT * FROM vendor ORDER BY vendor_name ASC LIMIT %s OFFSET %s", (limit, offset))
     vendor_data = cursor_show.fetchall()
 
     if not session.get('username'):
         return redirect(url_for('login_page'))
     else:
-        return render_template('pusat_data.html', sparepart_data=sparepart_data, vendor_data=vendor_data)
+        return render_template('pusat_data_vendor.html', vendor_data=vendor_data, page=total_page, next=_next, prev=_prev)
 
 
 @app.route("/BRICASH-APP/DataCenter/AddSparepart", methods=["GET", "POST"])
@@ -96,15 +130,20 @@ def add_data_sparepart():
         _brand = request.values.get("brand")
         _machineSeries = request.values.get("machine_series")
         _sparepartCode = request.values.get("sparepart_code")
+        _totalAdd = request.values.get("total_add")
 
-        sql_insert = "INSERT INTO sparepart VALUES (null, %s, %s, %s, %s, %s, null)"
-        data = (_sparepartName.upper(), _machineType.upper(), _brand.upper(), _machineSeries.upper(), _sparepartCode.upper())
+        i = 1
+        while i <= int(_totalAdd):
+            sql_insert = "INSERT INTO sparepart VALUES (null, %s, %s, %s, %s, %s, null)"
+            data = (_sparepartName.upper(), _machineType.upper(), _brand.upper(), _machineSeries.upper(),
+                    _sparepartCode.upper())
 
-        cursor = conn.cursor()
-        cursor.execute(sql_insert, data)
-        conn.commit()
+            cursor = conn.cursor()
+            cursor.execute(sql_insert, data)
+            conn.commit()
+            i = i + 1
 
-        return redirect(url_for('data_center'))
+        return redirect(url_for('data_center_sparepart'))
 
 
 @app.route("/BRICASH-APP/DataCenter/DeleteSparepart/<_id>")
@@ -116,7 +155,7 @@ def delete_data_sparepart(_id):
     cursor.execute(sql, data)
     conn.commit()
 
-    return redirect(url_for("data_center"))
+    return redirect(url_for('data_center_sparepart'))
 
 
 @app.route("/BRICASH-APP/DataCenter/UpdateSparepart/<_id>", methods=['GET', 'POST'])
@@ -130,12 +169,14 @@ def update_data_sparepart(_id):
     _sparepartCode = request.values.get("sparepart_code")
 
     sql = "UPDATE sparepart SET sparepart_name=%s, machine_type=%s, brand=%s, machine_series=%s, kd_sparepart=%s WHERE id_sparepart=%s"
-    update_data = (_sparepartName.upper(), _machineType.upper(), _brand.upper(), _machineSeries.upper(), _sparepartCode.upper(), _idTemp)
+    update_data = (
+    _sparepartName.upper(), _machineType.upper(), _brand.upper(), _machineSeries.upper(), _sparepartCode.upper(),
+    _idTemp)
     cursor_update = conn.cursor()
     cursor_update.execute(sql, update_data)
     conn.commit()
 
-    return redirect(url_for('data_center'))
+    return redirect(url_for('data_center_sparepart'))
 
 
 @app.route("/BRICASH-APP/DataCenter/TambahVendor", methods=['GET', 'POST'])
@@ -153,7 +194,7 @@ def add_data_vendor():
         cursor.execute(sql_insert, data)
         conn.commit()
 
-        return redirect(url_for('data_center'))
+        return redirect(url_for('data_center_vendor'))
 
 
 @app.route("/BRICASH-APP/DataCenter/UpdateVendor/<_id>", methods=['GET', 'POST'])
@@ -168,28 +209,37 @@ def update_data_vendor(_id):
     cursor_update.execute(sql, update_data)
     conn.commit()
 
-    return redirect(url_for('data_center'))
+    return redirect(url_for('data_center_vendor'))
 
 
 @app.route('/BRICASH-APP/BarangMasuk')
 def barang_masuk_page():
+    # Vendor list
+    sql_vList = "SELECT * FROM vendor ORDER BY vendor_name ASC"
+    cursor_vList = conn.cursor()
+    cursor_vList.execute(sql_vList)
+    vList = cursor_vList.fetchall()
+
     if not session.get('username'):
         return redirect(url_for('login_page'))
-    return render_template('barang_masuk.html')
+    else:
+        return render_template('barang_masuk.html', vList=vList)
 
 
 @app.route('/BRICASH-APP/BarangKeluar')
 def barang_keluar_page():
     if not session.get('username'):
         return redirect(url_for('login_page'))
-    return render_template('barang_keluar.html')
+    else:
+        return render_template('barang_keluar.html')
 
 
 @app.route('/BRICASH-APP/Report')
 def report_page():
     if not session.get('username'):
         return redirect(url_for('login_page'))
-    return 'Halaman report'
+    else:
+        return 'Halaman report'
 
 
 if __name__ == '__main__':

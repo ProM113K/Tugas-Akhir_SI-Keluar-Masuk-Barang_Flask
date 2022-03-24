@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}
+BRICASH-APP | Pusat Data Vendor
+{% endblock %}
+
+{% block titleNav %}
+Pusat Data Vendor
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!--Vendor Area-->
+    <div class="container border w-75 my-5 shadow p-3 mb-5 bg-body rounded">
+        <h5 class="float-start">Data Vendor</h5>
+        <!-- Button add vendor-->
+        <button class="btn btn-success btn-sm text-white float-end" title="Tambah data vendor baru"
+            data-bs-toggle="modal" data-bs-target="#addModalVendor">Tambah Vendor <i class="fa fa-plus"></i></button>
+
+        <!-- Modal add vendor -->
+        <div class="modal fade text-dark" id="addModalVendor" data-bs-backdrop="static" data-bs-keyboard="false"
+            tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Tambah Data</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/BRICASH-APP/DataCenter/TambahVendor" method="post">
+                            <div class="mb-3">
+                                <label for="vendor-name" class="col-form-label">Nama Vendor</label>
+                                <input type="text" class="form-control" name="vendor_name" id="vendor-name"
+                                    maxlength="50" required>
+                            </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+                        <input type="submit" class="btn btn-success" value="Simpan">
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!--End Add vendor here-->
+
+        <!-- Data Table -->
+        <table class="table table-dark table-striped p-3 mt-5">
+            <thead>
+                <tr>
+                    <th scope="col" hidden>ID</th>
+                    <th scope="col">Nama Vendor</th>
+                    <th scope="col">Opsi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vendor in vendor_data %}
+                <tr>
+                    <td hidden>{{ vendor[0] }}</td>
+                    <td>{{ vendor[1] }}</td>
+                    <td>
+                        <!-- Button edit modal -->
+                        <button type="button" class="btn btn-sm btn-outline btn-warning" data-bs-toggle="modal"
+                            data-bs-target="#editModalVendor-{{ vendor[0] }}">
+                            <i class="fa fa-edit"></i></button>
+
+                        <!-- Modal Edit -->
+                        <div class="modal fade text-dark" data-bs-backdrop="static" data-bs-keyboard="false"
+                            id="editModalVendor-{{ vendor[0] }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title text-dark" id="modalEditData">Edit data</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="/BRICASH-APP/DataCenter/UpdateVendor/{{ vendor[0] }}"
+                                            method="post">
+                                            <div class="form-group" hidden>
+                                                <label class="col-form-label">ID:</label>
+                                                <input class="form-control" name="temp_id" type="text"
+                                                    value="{{ vendor[0] }}">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="vendor-name" class="col-form-label">Nama
+                                                    Sparepart</label>
+                                                <input type="text" class="form-control" name="vendor_name"
+                                                    id="vendor-name" value="{{ vendor[1] }}" maxlength="50">
+                                            </div>
+                                            <div class=" modal-footer">
+                                                <button type="button" class="btn btn-danger"
+                                                    data-bs-dismiss="modal">Batal</button>
+                                                <input type="submit" class="btn btn-success" value="Simpan">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation example" class="overflow-auto w-25 mt-4">
+            <ul class="pagination">
+                <li class="page-item">
+                    {% if prev >= 1 %}
+                    <a class="page-link" href="/BRICASH-APP/DataCenter/Vendor/Page/{{ prev }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                    {% endif %}
+                </li>
+                {% for page in range(page) %}
+                <li class="page-item"><a class="page-link"
+                        href="/BRICASH-APP/DataCenter/Vendor/Page/{{ loop.index }}">{{ loop.index }}</a></li>
+                {% endfor %}
+                <li class="page-item">
+                    {% if next <= page %}
+                    <a class="page-link" href="/BRICASH-APP/DataCenter/Vendor/Page/{{ next }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %}

@@ -9,14 +9,15 @@ Barang Masuk
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4 bg-success rounded">
-    <div class="container text-white p-3">
-        PENCATATAN BARANG MASUK |
+<div class="container border my-5 shadow p-3 mb-5 bg-body rounded">
+    <div class="container p-3">
+        <span class="fw-bold">PENCATATAN BARANG MASUK | </span>
         <!-- Button Add -->
-        <button class="btn btn-primary btn-sm text-white" title="Tambah satu data" data-bs-toggle="modal" data-bs-target="#addModal">Tambah <i
-                class="fa fa-plus"></i></button>
+        <button class="btn btn-primary btn-sm" title="Tambah satu data" data-bs-toggle="modal"
+            data-bs-target="#addModal">Tambah <i class="fa fa-plus"></i></button>
         <!-- Button Add Multiple-->
-        <button class="btn btn-primary btn-sm text-white" title="Tambah banyak data sekaligus" data-bs-toggle="modal" data-bs-target="#addMultipleModal">Tambah
+        <button class="btn btn-primary btn-sm" title="Tambah banyak data sekaligus" data-bs-toggle="modal"
+            data-bs-target="#addMultipleModal">Tambah
             Sekaligus <i class="fa fa-plus"></i></button>
 
         <!-- Modal Add -->
@@ -29,38 +30,34 @@ Barang Masuk
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form>
+                        <form method="post">
                             <div class="mb-3">
                                 <label for="date-achieve" class="col-form-label">Tanggal Terima Barang</label>
-                                <input type="date" class="form-control" id="date-achieve">
+                                <input type="date" class="form-control" id="date-achieve" required>
                             </div>
                             <div class="mb-3">
                                 <label for="vendor-name" class="col-form-label">Vendor</label>
-                                <select class="form-select" id="vendor-name">
-                                    <option selected>Select vendor</option>
-                                    <option value="1">One</option>
-                                    <option value="2">Two</option>
-                                    <option value="3">Three</option>
+                                <select class="form-select" id="vendor-name" required>
+                                    <option value="" selected>Pilih vendor</option>
+                                    {% for list in vList %}
+                                    <option value="{{ list[0] }}">{{ list[1] }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                             <div class="mb-3">
                                 <label for="courier-name" class="col-form-label">Nama Pengirim</label>
-                                <input type="text" class="form-control" id="courier-name">
+                                <input type="text" class="form-control" id="courier-name" required>
                             </div>
                             <div class="mb-3">
                                 <label for="position-worker" class="col-form-label">Jabatan</label>
-                                <input type="text" class="form-control" id="position-worker">
+                                <input type="text" class="form-control" id="position-worker" required>
                             </div>
-                            <div class="mb-3">
-                                <label for="necessity-text" class="col-form-label">Keperluan</label>
-                                <textarea class="form-control" id="necessity-text"></textarea>
-                            </div>
-                        </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-success">Save</button>
+                        <input type="submit" class="btn btn-success" value="Simpan">
                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
                     </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -78,18 +75,18 @@ Barang Masuk
                         <form>
                             <div class="mb-3">
                                 <label for="recipient-name" class="col-form-label">Recipient:</label>
-                                <input type="text" class="form-control" id="recipient-name">
+                                <input type="text" class="form-control" id="recipient-name" required>
                             </div>
                             <div class="mb-3">
                                 <label for="message-text" class="col-form-label">Message:</label>
                                 <textarea class="form-control" id="message-text"></textarea>
                             </div>
-                        </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Send message</button>
+                        <input type="submit" class="btn btn-success" value="Simpan">
                     </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -103,7 +100,6 @@ Barang Masuk
                     <th scope="col">Vendor</th>
                     <th scope="col">Nama Pengirim</th>
                     <th scope="col">Jabatan</th>
-                    <th scope="col"></th>
                     <th scope="col">Opsi</th>
                 </tr>
             </thead>
@@ -197,11 +193,12 @@ Barang Masuk
                                                     id="sparepart-code" value="{{ spareparts[5] }}">
                                             </div>
                                             <div class=" modal-footer">
-                                                <button type="button" class="btn btn-danger"
-                                                    data-bs-dismiss="modal">Batal</button>
                                                 <a href="/BRICASH-APP/DataCenter/Update/{{ spareparts[0] }}"><button
                                                         type="button" class="btn btn-success">Simpan
                                                     </button></a>
+                                                <button type="button" class="btn btn-danger"
+                                                    data-bs-dismiss="modal">Batal</button>
+
                                             </div>
                                         </form>
                                     </div>
