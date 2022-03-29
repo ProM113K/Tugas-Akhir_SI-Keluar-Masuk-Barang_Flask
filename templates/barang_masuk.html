@@ -30,32 +30,64 @@ Barang Masuk
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form method="post">
+                        <form action="/BRICASH-APP/BarangMasuk/Tambah" method="post">
                             <div class="mb-3">
                                 <label for="date-achieve" class="col-form-label">Tanggal Terima Barang</label>
-                                <input type="date" class="form-control" id="date-achieve" required>
+                                <input type="date" class="form-control" id="date-achieve" name="date_achieve" required>
                             </div>
                             <div class="mb-3">
                                 <label for="vendor-name" class="col-form-label">Vendor</label>
-                                <select class="form-select" id="vendor-name" required>
+                                <select class="form-select" id="vendor-name" name="vendor_name" required>
                                     <option value="" selected>Pilih vendor</option>
-                                    {% for list in vList %}
-                                    <option value="{{ list[0] }}">{{ list[1] }}</option>
+                                    {% for vendor in vList %}
+                                    <option value="{{ vendor[0] }}">{{ vendor[1] }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                             <div class="mb-3">
                                 <label for="courier-name" class="col-form-label">Nama Pengirim</label>
-                                <input type="text" class="form-control" id="courier-name" required>
+                                <input type="text" class="form-control" id="courier-name" name="courier_name"
+                                    maxlength="20" required>
                             </div>
                             <div class="mb-3">
                                 <label for="position-worker" class="col-form-label">Jabatan</label>
-                                <input type="text" class="form-control" id="position-worker" required>
+                                <input type="text" class="form-control" id="position-worker" name="position_worker"
+                                    maxlength="20" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="purchase-order" class="col-form-label">No Purchase Order</label>
+                                <input type="text" class="form-control" id="purchase-order" name="purchase_order"
+                                    maxlength="30" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="delivery_order" class="col-form-label">No Delivery Order</label>
+                                <input type="text" class="form-control" id="delivery_order" name="delivery_order"
+                                    maxlength="30" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="sparepart-name" class="col-form-label">Sparepart</label>
+                                <select class="form-select" id="sparepart-name" name="sparepart_name" required>
+                                    <option value="" selected>Pilih sparepart</option>
+                                    {% for sparepart in sList %}
+                                    <option value="{{ sparepart[0] }}">
+                                        {{ sparepart[3] }}|{{ sparepart[4] }}|{{ sparepart[2] }}|{{ sparepart[5] }}|{{ sparepart[1] }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="serial_number" class="col-form-label">Serial Number</label>
+                                <input type="text" class="form-control" id="serial-number" name="serial_number"
+                                    maxlength="20" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="total-add" class="col-form-label">Jumlah</label>
+                                <input type="number" class="form-control" name="total_add" id="total-add" min="1" required>
                             </div>
                     </div>
                     <div class="modal-footer">
-                        <input type="submit" class="btn btn-success" value="Simpan">
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Batal</button>
+                        <input type="submit" class="btn btn-success" name="addSingle" value="Simpan">
                     </div>
                     </form>
                 </div>
@@ -72,7 +104,7 @@ Barang Masuk
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form>
+                        <form action="/BRICASH-APP/BarangMasuk/Tambah" method="post">
                             <div class="mb-3">
                                 <label for="recipient-name" class="col-form-label">Recipient:</label>
                                 <input type="text" class="form-control" id="recipient-name" required>
@@ -84,7 +116,7 @@ Barang Masuk
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <input type="submit" class="btn btn-success" value="Simpan">
+                        <input type="submit" class="btn btn-success" name="addMultiple" value="Simpan">
                     </div>
                     </form>
                 </div>
@@ -94,38 +126,50 @@ Barang Masuk
         <!-- Data Table -->
         <table class="table table-dark table-striped p-3 my-5">
             <thead>
-                <tr>
+                <tr class="text-center">
+                    <th scope="col">No</th>
                     <th scope="col" hidden>ID</th>
                     <th scope="col">Tanggal</th>
                     <th scope="col">Vendor</th>
+                    <th scope="col" hidden>ID Vendor</th>
                     <th scope="col">Nama Pengirim</th>
                     <th scope="col">Jabatan</th>
+                    <th scope="col">No Purchase Order</th>
+                    <th scope="col">No Delivery Order</th>
+                    <th scope="col">Nama Sparepart</th>
+                    <th scope="col">Serial Number</th>
                     <th scope="col">Opsi</th>
                 </tr>
             </thead>
             <tbody>
-                {% for spareparts in sparepart_data %}
-                <tr>
-                    <td hidden>{{ spareparts[0] }}</td>
-                    <td>{{ spareparts[1] }}</td>
-                    <td>{{ spareparts[2] }}</td>
-                    <td>{{ spareparts[3] }}</td>
-                    <td>{{ spareparts[4] }}</td>
-                    <td>{{ spareparts[5] }}</td>
+                {% for data in showData %}
+                <tr class="text-center">
+                    <td>{{ loop.index }}</td>
+                    <td hidden>{{ data[0] }}</td>
+                    <td>{{ data[1] }}</td>
+                    <td hidden>{{ data[2] }}</td>
+                    <td>{{ data[3] }}</td>
+                    <td>{{ data[4] }}</td>
+                    <td>{{ data[5] }}</td>
+                    <td>{{ data[6] }}</td>
+                    <td hidden>{{ data[7] }}</td>
+                    <td>{{ data[8] }}</td>
+                    <td>{{ data[9] }}</td>
+                    <td>{{ data[10] }}</td>
                     <td>
                         <!-- Button delete modal -->
                         <button type="button" class="btn btn-sm btn-outline btn-danger" data-bs-toggle="modal"
-                            data-bs-target="#hapusModal-{{ spareparts[0] }}">
+                            data-bs-target="#hapusModal-{{ data[0] }}">
                             <i class="fa fa-trash-alt"></i>
                         </button>
 
                         <!-- Button edit modal -->
                         <button type="button" class="btn btn-sm btn-outline btn-warning" data-bs-toggle="modal"
-                            data-bs-target="#editModal-{{ spareparts[0] }}">
+                            data-bs-target="#editModal-{{ data[0] }}">
                             <i class="fa fa-edit"></i></button>
 
                         <!-- Modal Hapus -->
-                        <div class="modal fade" id="hapusModal-{{ spareparts[0] }}" data-bs-backdrop="static"
+                        <div class="modal fade" id="hapusModal-{{ data[0] }}" data-bs-backdrop="static"
                             data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
@@ -138,11 +182,12 @@ Barang Masuk
                                         <p class="text-dark">Anda yakin ingin menghapus data sparepart ini?</p>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary"
-                                            data-bs-dismiss="modal">Batal</button>
-                                        <a href="/BRICASH-APP/DataCenter/Delete/{{ spareparts[0] }}"><button
-                                                type="button" class="btn btn-danger">Hapus
-                                            </button></a>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal
+                                        </button>
+                                        <a href="/BRICASH-APP/BarangMasuk/Hapus/{{ data[0] }}">
+                                            <button type="button" class="btn btn-danger">Hapus
+                                            </button>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -150,7 +195,7 @@ Barang Masuk
 
                         <!-- Modal Edit -->
                         <div class="modal fade text-dark" data-bs-backdrop="static" data-bs-keyboard="false"
-                            id="editModal-{{ spareparts[0] }}" tabindex="-1" aria-hidden="true">
+                            id="editModal-{{ data[0] }}" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-scrollable">
                                 <div class="modal-content">
                                     <div class="modal-header">
@@ -163,41 +208,46 @@ Barang Masuk
                                             <div class="form-group" hidden>
                                                 <label class="col-form-label">ID:</label>
                                                 <input class="form-control" name="temp_id" type="text"
-                                                    value="{{ spareparts[0] }}">
+                                                    value="{{ data[0] }}">
                                             </div>
                                             <div class="mb-3">
-                                                <label for="sparepart-name" class="col-form-label">Nama
-                                                    Sparepart</label>
+                                                <label for="date-achieve" class="col-form-label">Tanggal Terima Barang</label>
+                                                <input type="date" class="form-control" id="date-achieve" name="date_achieve" value="{{ data[1] }}" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="sparepart-name" class="col-form-label">Vendor</label>
                                                 <input type="text" class="form-control" name="sparepart_name"
-                                                    id="sparepart-name" value="{{ spareparts[1] }}">
+                                                    id="sparepart-name" value="{{ data[1] }}">
                                             </div>
                                             <div class="mb-3">
                                                 <label for="machine-type" class="col-form-label">Tipe Mesin</label>
                                                 <input type="text" class="form-control" name="machine_type"
-                                                    id="machine-type" value="{{ spareparts[2] }}">
+                                                    id="machine-type" value="{{ data[2] }}">
                                             </div>
                                             <div class="mb-3">
                                                 <label for="brand" class="col-form-label">Brand</label>
                                                 <input type="text" class="form-control" name="brand" id="brand"
-                                                    value="{{ spareparts[3] }}">
+                                                    value="{{ data[3] }}">
                                             </div>
                                             <div class=" mb-3">
                                                 <label for="machine-series" class="col-form-label">Seri Mesin</label>
                                                 <input type="text" class="form-control" name="machine_series"
-                                                    id="machine-series" value="{{ spareparts[4] }}">
+                                                    id="machine-series" value="{{ data[4] }}">
                                             </div>
                                             <div class=" mb-3">
                                                 <label for="sparepart-code" class="col-form-label">Kode
                                                     Sparepart</label>
                                                 <input type="text" class="form-control" name="sparepart_code"
-                                                    id="sparepart-code" value="{{ spareparts[5] }}">
+                                                    id="sparepart-code" value="{{ data[5] }}">
                                             </div>
                                             <div class=" modal-footer">
-                                                <a href="/BRICASH-APP/DataCenter/Update/{{ spareparts[0] }}"><button
-                                                        type="button" class="btn btn-success">Simpan
-                                                    </button></a>
+                                                <a href="#">
+                                                    <button type="button" class="btn btn-success">Simpan
+                                                    </button>
+                                                </a>
                                                 <button type="button" class="btn btn-danger"
-                                                    data-bs-dismiss="modal">Batal</button>
+                                                    data-bs-dismiss="modal">Batal
+                                                </button>
 
                                             </div>
                                         </form>

@@ -90,7 +90,8 @@ def data_center_sparepart(page):
     if not session.get('username'):
         return redirect(url_for('login_page'))
     else:
-        return render_template('pusat_data_sparepart.html', sparepart_data=sparepart_data, page=total_page, next=_next, prev=_prev)
+        return render_template('pusat_data_sparepart.html', sparepart_data=sparepart_data, page=total_page, next=_next,
+                               prev=_prev)
 
 
 @app.route('/BRICASH-APP/DataCenter/Vendor', methods=['GET'], defaults={'page': 1})
@@ -116,7 +117,9 @@ def data_center_vendor(page):
     if not session.get('username'):
         return redirect(url_for('login_page'))
     else:
-        return render_template('pusat_data_vendor.html', vendor_data=vendor_data, page=total_page, next=_next, prev=_prev)
+        return render_template('pusat_data_vendor.html', vendor_data=vendor_data, row=total_row, page=total_page,
+                               next=_next,
+                               prev=_prev)
 
 
 @app.route("/BRICASH-APP/DataCenter/AddSparepart", methods=["GET", "POST"])
@@ -130,32 +133,26 @@ def add_data_sparepart():
         _brand = request.values.get("brand")
         _machineSeries = request.values.get("machine_series")
         _sparepartCode = request.values.get("sparepart_code")
-        _totalAdd = request.values.get("total_add")
 
-        i = 1
-        while i <= int(_totalAdd):
-            sql_insert = "INSERT INTO sparepart VALUES (null, %s, %s, %s, %s, %s, null)"
-            data = (_sparepartName.upper(), _machineType.upper(), _brand.upper(), _machineSeries.upper(),
-                    _sparepartCode.upper())
+        data = (_sparepartName.upper(), _machineType.upper(), _brand.upper(), _machineSeries.upper(),
+                _sparepartCode.upper())
 
-            cursor = conn.cursor()
-            cursor.execute(sql_insert, data)
-            conn.commit()
-            i = i + 1
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO sparepart VALUES (null, %s, %s, %s, %s, %s, null)", data)
+        conn.commit()
+
+        # i = 1
+        # while i <= int(_totalAdd):
+        #     sql_insert = "INSERT INTO sparepart VALUES (null, %s, %s, %s, %s, %s, null)"
+        #     data = (_sparepartName.upper(), _machineType.upper(), _brand.upper(), _machineSeries.upper(),
+        #             _sparepartCode.upper())
+        #
+        #     cursor = conn.cursor()
+        #     cursor.execute(sql_insert, data)
+        #     conn.commit()
+        #     i = i + 1
 
         return redirect(url_for('data_center_sparepart'))
-
-
-@app.route("/BRICASH-APP/DataCenter/DeleteSparepart/<_id>")
-def delete_data_sparepart(_id):
-    sql = "DELETE FROM sparepart WHERE id_sparepart = %s"
-
-    data = _id
-    cursor = conn.cursor()
-    cursor.execute(sql, data)
-    conn.commit()
-
-    return redirect(url_for('data_center_sparepart'))
 
 
 @app.route("/BRICASH-APP/DataCenter/UpdateSparepart/<_id>", methods=['GET', 'POST'])
@@ -170,8 +167,8 @@ def update_data_sparepart(_id):
 
     sql = "UPDATE sparepart SET sparepart_name=%s, machine_type=%s, brand=%s, machine_series=%s, kd_sparepart=%s WHERE id_sparepart=%s"
     update_data = (
-    _sparepartName.upper(), _machineType.upper(), _brand.upper(), _machineSeries.upper(), _sparepartCode.upper(),
-    _idTemp)
+        _sparepartName.upper(), _machineType.upper(), _brand.upper(), _machineSeries.upper(), _sparepartCode.upper(),
+        _idTemp)
     cursor_update = conn.cursor()
     cursor_update.execute(sql, update_data)
     conn.commit()
@@ -204,7 +201,7 @@ def update_data_vendor(_id):
     _vendorName = request.values.get("vendor_name")
 
     sql = "UPDATE vendor SET vendor_name=%s WHERE id_vendor=%s"
-    update_data = (_vendorName, _idTemp)
+    update_data = (_vendorName.upper(), _idTemp)
     cursor_update = conn.cursor()
     cursor_update.execute(sql, update_data)
     conn.commit()
@@ -215,15 +212,68 @@ def update_data_vendor(_id):
 @app.route('/BRICASH-APP/BarangMasuk')
 def barang_masuk_page():
     # Vendor list
-    sql_vList = "SELECT * FROM vendor ORDER BY vendor_name ASC"
     cursor_vList = conn.cursor()
-    cursor_vList.execute(sql_vList)
+    cursor_vList.execute("SELECT * FROM vendor ORDER BY vendor_name ASC")
     vList = cursor_vList.fetchall()
+
+    # Sparepart list
+    cursor_sList = conn.cursor()
+    cursor_sList.execute("SELECT * FROM sparepart ORDER BY sparepart_name ASC")
+    sList = cursor_sList.fetchall()
+
+    # Show data
+    sql_showData = "SELECT barang_masuk.id_sender, barang_masuk.date_send, vendor.id_vendor, vendor.vendor_name, barang_masuk.nama_pengirim, barang_masuk.jabatan, list_barang_masuk.no_po, list_barang_masuk.no_do, sparepart.id_sparepart, sparepart.sparepart_name, list_barang_masuk.serial_number FROM barang_masuk INNER JOIN vendor ON barang_masuk.id_vendor = vendor.id_vendor INNER JOIN list_barang_masuk ON list_barang_masuk.id_sender = barang_masuk.id_sender INNER JOIN sparepart ON list_barang_masuk.id_sparepart = sparepart.id_sparepart;"
+    cursor_showData = conn.cursor()
+    cursor_showData.execute(sql_showData)
+    showData = cursor_showData.fetchall()
 
     if not session.get('username'):
         return redirect(url_for('login_page'))
     else:
-        return render_template('barang_masuk.html', vList=vList)
+        return render_template('barang_masuk.html', vList=vList, sList=sList, showData=showData)
+
+
+@app.route('/BRICASH-APP/BarangMasuk/Tambah', methods=['POST'])
+def add_data_income():
+    _date = request.values.get('date_achieve')
+    _vendorName = request.values.get('vendor_name')
+    _courierName = request.values.get('courier_name')
+    _positionWorker = request.values.get('position_worker')
+    _noPO = request.values.get('purchase_order')
+    _noDO = request.values.get('delivery_order')
+    _sparepart = request.values.get('sparepart_name')
+    _serialNumber = request.values.get('serial_number')
+    _totalAdd = request.values.get('total_add')
+
+    cursor = conn.cursor()
+
+    if 'addSingle' in request.form:
+        cursor.execute("BEGIN;")
+        cursor.execute("INSERT INTO barang_masuk VALUES (null, %s, %s, %s, %s);",
+                       (_vendorName, _date, _courierName, _positionWorker))
+        cursor.execute("SELECT LAST_INSERT_ID() INTO @id_terakhir")
+        cursor.execute("INSERT INTO list_barang_masuk VALUES (null, @id_terakhir, %s, %s, %s, %s)",
+                       (_noPO, _noDO, _sparepart, _serialNumber))
+        cursor.execute("COMMIT")
+        conn.commit()
+    elif 'addMultiple' in request.form:
+        print('Ini tambah sekaligus')
+
+    return redirect(url_for('barang_masuk_page'))
+
+
+# @app.route('/BRICASH-APP/BarangMasuk/Update/<_id>', methods=['GET', 'POST'])
+# def update_data_income(_id):
+
+@app.route('/BRICASH-APP/BarangMasuk/Hapus/<_id>')
+def delete_data_income(_id):
+    data = _id
+
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM barang_masuk WHERE id_sender=%s", data)
+    conn.commit()
+
+    return redirect(url_for('barang_masuk_page'))
 
 
 @app.route('/BRICASH-APP/BarangKeluar')
