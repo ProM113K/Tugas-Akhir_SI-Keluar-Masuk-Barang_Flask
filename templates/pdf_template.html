@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan</title>
+</head>
+
+<body>
+    <div class="container table-responsive">
+        <table class="table table-dark table-striped mt-3 text-center">
+            <thead>
+                {% if btn == 'Keluar' %}
+                <tr>
+                    <th scope="col">No</th>
+                    <th scope="col">Tanggal</th>
+                    <th scope="col">Tujuan</th>
+                    <th scope="col">Nama Petugas</th>
+                    <th scope="col">No Purchase Order</th>
+                    <th scope="col">Nama Sparepart</th>
+                    <th scope="col">Serial Number</th>
+                    <th scope="col">Keterangan</th>
+                </tr>
+                {% elif btn == 'Masuk' %}
+                <tr>
+                    <th scope="col">No</th>
+                    <th scope="col">Tanggal</th>
+                    <th scope="col">Vendor</th>
+                    <th scope="col">Nama Pengirim</th>
+                    <th scope="col">No Purchase Order</th>
+                    <th scope="col">No Delivery Order</th>
+                    <th scope="col">Nama Sparepart</th>
+                    <th scope="col">Serial Number</th>
+                </tr>
+                {% endif %}
+            </thead>
+            <tbody>
+                {% if btn == 'Keluar' %}
+                {% for i in data %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ i[0] }}</td>
+                    <td>{{ i[1] }}</td>
+                    <td>{{ i[2] }}</td>
+                    <td>{{ i[3] }}</td>
+                    <td>{{ i[4] }}</td>
+                    <td>{{ i[5] }}</td>
+                    <td>{{ i[6] }}</td>
+                </tr>
+                {% endfor %}
+                {% elif btn == 'Masuk' %}
+                {% for i in data %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ i[0] }}</td>
+                    <td>{{ i[1] }}</td>
+                    <td>{{ i[2] }}</td>
+                    <td>{{ i[3] }}</td>
+                    <td>{{ i[4] }}</td>
+                    <td>{{ i[5] }}</td>
+                    <td>{{ i[6] }}</td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

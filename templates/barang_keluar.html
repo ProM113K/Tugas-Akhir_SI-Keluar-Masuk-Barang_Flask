@@ -1,36 +1,36 @@
 {% extends 'base.html' %}
 
 {% block title %}
-BRICASH-APP | Barang Masuk
+BRICASH-APP | Barang Keluar
 {% endblock %}
 
 {% block titleNav %}
-Barang Masuk
+Barang Keluar
 {% endblock %}
 
 {% block content %}
 <div class="container border my-5 shadow p-3 mb-5 bg-body rounded">
     <div class="container p-3">
-        <span class="fw-bold">PENCATATAN BARANG MASUK | </span>
+        <span class="fw-bold">PENCATATAN BARANG KELUAR | </span>
         <!-- Button Add -->
         <button class="btn btn-primary btn-sm" title="Tambah satu data" data-bs-toggle="modal"
             data-bs-target="#addModal">Tambah <i class="fa fa-plus"></i></button>
 
-        <form action="/BRICASH-APP/BarangMasuk/Search" class="float-end">
-            <label for="search-box">Cari data:</label>
-            <select name="kategori">
-                <option value=""></option>
-                <option value="tgl">Tanggal</option>
-                <option value="sender">Pengirim</option>
-                <option value="vendor">Vendor</option>
-                <option value="po">No PO</option>
-                <option value="do">No DO</option>
-                <option value="sparepart">Sparepart</option>
-                <option value="sn">Serial Number</option>
-            </select>
-            <input type="text" name="search_box" id="search-box">
-            <input type="submit" value="Cari">
-        </form>
+            <form action="/BRICASH-APP/BarangKeluar/Search" class="float-end">
+                <label for="search-box">Cari data:</label>
+                <select name="kategori">
+                    <option value=""></option>
+                    <option value="tgl">Tanggal</option>
+                    <option value="sender">Petugas</option>
+                    <option value="vendor">Tujuan</option>
+                    <option value="po">No PO</option>
+                    <option value="sparepart">Sparepart</option>
+                    <option value="sn">Serial Number</option>
+                    <option value="ket">Keterangan</option>
+                </select>
+                <input type="text" name="search_box" id="search-box">
+                <input type="submit" value="Cari">
+            </form>
 
         <!-- Modal Add -->
         <div class="modal modal-scrollable fade text-dark" data-bs-backdrop="static" data-bs-keyboard="false"
@@ -38,37 +38,32 @@ Barang Masuk
             <div class="modal-dialog modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Tambah Barang Masuk</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Tambah Barang Keluar</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form action="/BRICASH-APP/BarangMasuk/Tambah" method="post">
+                        <form action="/BRICASH-APP/BarangKeluar/Tambah" method="post">
                             <div class="mb-3">
-                                <label for="date-achieve" class="col-form-label">Tanggal Terima Barang</label>
+                                <label for="date-achieve" class="col-form-label">Tanggal Kirim Barang</label>
                                 <input type="date" class="form-control" id="date-achieve" name="date_achieve" required>
                             </div>
                             <div class="mb-3">
-                                <label for="vendor-name" class="col-form-label">Vendor</label>
+                                <label for="vendor-name" class="col-form-label">Tujuan</label>
                                 <select class="form-select" id="vendor-name" name="vendor_name" required>
-                                    <option value="" selected>Pilih vendor</option>
+                                    <option value="" selected>Pilih tujuan</option>
                                     {% for vendor in vList %}
                                     <option value="{{ vendor[0] }}">{{ vendor[1] }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="courier-name" class="col-form-label">Nama Pengirim</label>
+                                <label for="courier-name" class="col-form-label">Nama Petugas</label>
                                 <input type="text" class="form-control" id="courier-name" name="courier_name"
                                     maxlength="20" required>
                             </div>
                             <div class="mb-3">
                                 <label for="purchase-order" class="col-form-label">No Purchase Order</label>
                                 <input type="text" class="form-control" id="purchase-order" name="purchase_order"
-                                    maxlength="30" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="delivery_order" class="col-form-label">No Delivery Order</label>
-                                <input type="text" class="form-control" id="delivery_order" name="delivery_order"
                                     maxlength="30" required>
                             </div>
                             <div class="mb-3">
@@ -87,6 +82,11 @@ Barang Masuk
                                 <input type="text" class="form-control" id="serial-number" name="serial_number"
                                     maxlength="20" required>
                             </div>
+                            <div class="mb-3">
+                                <label for="keterangan" class="col-form-label">Keterangan</label>
+                                <input type="text" class="form-control" name="keterangan" id="keterangan class=" form-control" maxlength="20"
+                                    required>
+                            </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Batal</button>
@@ -97,6 +97,7 @@ Barang Masuk
             </div>
         </div>
 
+
         <!-- Data Table -->
         <table class="table table-dark table-striped p-3 my-5">
             <thead>
@@ -104,15 +105,15 @@ Barang Masuk
                     <th scope="col">No</th>
                     <th scope="col" hidden>ID</th>
                     <th scope="col">Tanggal</th>
-                    <th scope="col">Vendor</th>
+                    <th scope="col">Tujuan</th>
                     <th scope="col" hidden>ID Vendor</th>
-                    <th scope="col">Nama Pengirim</th>
+                    <th scope="col">Nama Petugas</th>
                     <th scope="col" hidden>ID List Barang</th>
                     <th scope="col">No Purchase Order</th>
-                    <th scope="col">No Delivery Order</th>
                     <th scope="col">Nama Sparepart</th>
                     <th scope="col" hidden>ID Sparepart</th>
                     <th scope="col">Serial Number</th>
+                    <th scope="col">Keterangan</th>
                     <th scope="col">Opsi</th>
                 </tr>
             </thead>
@@ -125,12 +126,12 @@ Barang Masuk
                     <td>{{ data[3] }}</td>
                     <td hidden>{{ data[2] }}</td>
                     <td>{{ data[4] }}</td>
-                    <td hidden>{{ data[10] }}</td>
+                    <td hidden>{{ data[9] }}</td>
                     <td>{{ data[5] }}</td>
-                    <td>{{ data[6] }}</td>
+                    <td>{{ data[7] }}</td>
+                    <td hidden>{{ data[6] }}</td>
                     <td>{{ data[8] }}</td>
-                    <td hidden>{{ data[7] }}</td>
-                    <td>{{ data[9] }}</td>
+                    <td>{{ data[10] }}</td>
                     <td class="text-start">
                         <!-- Button delete modal -->
                         <button type="button" class="btn btn-sm btn-outline btn-danger" data-bs-toggle="modal"
@@ -159,7 +160,7 @@ Barang Masuk
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal
                                         </button>
-                                        <a href="/BRICASH-APP/BarangMasuk/Hapus/{{ data[0] }}">
+                                        <a href="/BRICASH-APP/BarangKeluar/Hapus/{{ data[0] }}">
                                             <button type="button" class="btn btn-danger">Hapus
                                             </button>
                                         </a>
@@ -203,14 +204,14 @@ Barang Masuk
                                                 </select>
                                             </div>
                                             <div class="mb-3">
-                                                <label for="courier-name" class="col-form-label">Nama Pengirim</label>
+                                                <label for="courier-name" class="col-form-label">Nama Petugas</label>
                                                 <input type="text" class="form-control" id="courier-name"
                                                     name="courier_name" maxlength="20" value="{{ data[4] }}" required>
                                             </div>
                                             <div class="form-group" hidden>
                                                 <label class="col-form-label">ID List Barang:</label>
                                                 <input class="form-control" name="temp_id_list_barang" type="text"
-                                                    value="{{ data[10] }}">
+                                                    value="{{ data[9] }}">
                                             </div>
                                             <div class="mb-3">
                                                 <label for="purchase-order" class="col-form-label">No Purchase
@@ -219,16 +220,10 @@ Barang Masuk
                                                     name="purchase_order" maxlength="30" value="{{ data[5] }}" required>
                                             </div>
                                             <div class="mb-3">
-                                                <label for="delivery_order" class="col-form-label">No Delivery
-                                                    Order</label>
-                                                <input type="text" class="form-control" id="delivery_order"
-                                                    name="delivery_order" maxlength="30" value="{{ data[6] }}" required>
-                                            </div>
-                                            <div class="mb-3">
                                                 <label for="sparepart-name" class="col-form-label">Sparepart</label>
                                                 <select class="form-select" id="sparepart-name" name="sparepart_name"
                                                     required>
-                                                    <option value="{{ data[7] }}" selected>{{ data[8] }}</option>
+                                                    <option value="{{ data[6] }}" selected>{{ data[7] }}</option>
                                                     {% for sparepart in sList %}
                                                     <option value="{{ sparepart[0] }}">
                                                         {{ sparepart[3] }}|{{ sparepart[4] }}|{{ sparepart[2] }}|{{ sparepart[5] }}|{{ sparepart[1] }}
@@ -239,7 +234,12 @@ Barang Masuk
                                             <div class="mb-3">
                                                 <label for="serial_number" class="col-form-label">Serial Number</label>
                                                 <input type="text" class="form-control" id="serial-number"
-                                                    name="serial_number" maxlength="20" value="{{ data[9] }}" required>
+                                                    name="serial_number" maxlength="20" value="{{ data[8] }}" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="keterangan" class="col-form-label">Keterangan</label>
+                                                <input type="text" class="form-control" name="keterangan"
+                                                    id="keterangan" maxlength="20" value="{{ data[10] }}" required>
                                             </div>
                                             <div class=" modal-footer">
                                                 <button type="button" class="btn btn-danger"
@@ -257,29 +257,5 @@ Barang Masuk
                 {% endfor %}
             </tbody>
         </table>
-
-        <!-- Pagination -->
-        <nav aria-label="Page navigation example" class="overflow-auto w-25 mt-4">
-            <ul class="pagination">
-                <li class="page-item">
-                    {% if prev >= 1 %}
-                    <a class="page-link" href="/BRICASH-APP/BarangMasuk/Page/{{ prev }}" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                    {% endif %}
-                </li>
-                {% for page in range(page) %}
-                <li class="page-item"><a class="page-link"
-                        href="/BRICASH-APP/BarangMasuk/Page/{{ loop.index }}">{{ loop.index
-                    }}</a></li>
-                {% endfor %}
-                <li class="page-item">
-                    {% if next <= page %}
-                    <a class="page-link" href="/BRICASH-APP/BarangMasuk/Page/{{ next }}" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a></li>
-                {% endif %}
-            </ul>
-        </nav>
     </div>
     {% endblock %}
