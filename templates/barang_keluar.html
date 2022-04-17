@@ -16,21 +16,21 @@ Barang Keluar
         <button class="btn btn-primary btn-sm" title="Tambah satu data" data-bs-toggle="modal"
             data-bs-target="#addModal">Tambah <i class="fa fa-plus"></i></button>
 
-            <form action="/BRICASH-APP/BarangKeluar/Search" class="float-end">
-                <label for="search-box">Cari data:</label>
-                <select name="kategori">
-                    <option value=""></option>
-                    <option value="tgl">Tanggal</option>
-                    <option value="sender">Petugas</option>
-                    <option value="vendor">Tujuan</option>
-                    <option value="po">No PO</option>
-                    <option value="sparepart">Sparepart</option>
-                    <option value="sn">Serial Number</option>
-                    <option value="ket">Keterangan</option>
-                </select>
-                <input type="text" name="search_box" id="search-box">
-                <input type="submit" value="Cari">
-            </form>
+        <form action="/BRICASH-APP/BarangKeluar/Search" class="float-end">
+            <label for="search-box">Cari data:</label>
+            <select name="kategori">
+                <option value=""></option>
+                <option value="tgl">Tanggal</option>
+                <option value="sender">Petugas</option>
+                <option value="vendor">Tujuan</option>
+                <option value="po">No PO</option>
+                <option value="sparepart">Sparepart</option>
+                <option value="sn">Serial Number</option>
+                <option value="ket">Keterangan</option>
+            </select>
+            <input type="text" name="search_box" id="search-box">
+            <input type="submit" value="Cari">
+        </form>
 
         <!-- Modal Add -->
         <div class="modal modal-scrollable fade text-dark" data-bs-backdrop="static" data-bs-keyboard="false"
@@ -84,8 +84,8 @@ Barang Keluar
                             </div>
                             <div class="mb-3">
                                 <label for="keterangan" class="col-form-label">Keterangan</label>
-                                <input type="text" class="form-control" name="keterangan" id="keterangan class=" form-control" maxlength="20"
-                                    required>
+                                <input type="text" class="form-control" name="keterangan" id="keterangan class="
+                                    form-control" maxlength="20" required>
                             </div>
                     </div>
                     <div class="modal-footer">
@@ -155,7 +155,7 @@ Barang Keluar
                                             aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <p class="text-dark">Anda yakin ingin menghapus data sparepart ini?</p>
+                                        <p class="text-dark">Anda yakin ingin menghapus data ini?</p>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal
@@ -180,7 +180,7 @@ Barang Keluar
                                             aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="/BRICASH-APP/BarangMasuk/Update/{{ data[0] }}/{{ data[10] }}"
+                                        <form action="/BRICASH-APP/BarangKeluar/Update/{{ data[0] }}/{{ data[9] }}"
                                             method="post">
                                             <div class="form-group" hidden>
                                                 <label class="col-form-label">ID:</label>

@@ -1,14 +1,11 @@
 import math
-from urllib import response
 
-from flask import Flask, render_template, url_for, request, session, redirect, flash, Response, make_response
+import pdfkit
+from flask import Flask, render_template, url_for, request, session, redirect, flash, make_response
 from flaskext.mysql import MySQL
-from fpdf import FPDF
 
 from flask_session import Session
 from mysql_env import *
-
-import pdfkit
 
 app = Flask(__name__)
 app.secret_key = 'f5c50af369fac1ec902'
@@ -30,10 +27,38 @@ conn = mysql.connect()
 @app.route('/')
 @app.route('/BRICASH-APP/Dashboard')
 def home_page():
+    # Show data income
+    cursor_income = conn.cursor()
+    cursor_income.execute(
+        "SELECT pengiriman.date_send,vendor.vendor_name,pengiriman.nama_petugas,list_barang.no_po,list_barang.no_do,sparepart.sparepart_name,list_barang.serial_number FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'masuk' AND MONTH(pengiriman.date_send) = MONTH(CURRENT_DATE()) AND YEAR(pengiriman.date_send) = YEAR(CURRENT_DATE()) ORDER BY pengiriman.date_send DESC;")
+    data_income = cursor_income.fetchall()
+    cursor_income.close()
+
+    # Show data outcome
+    cursor_outcome = conn.cursor()
+    cursor_outcome.execute(
+        "SELECT pengiriman.date_send,vendor.vendor_name,pengiriman.nama_petugas,list_barang.no_po,sparepart.sparepart_name,list_barang.serial_number FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'keluar' AND MONTH(pengiriman.date_send) = MONTH(CURRENT_DATE()) AND YEAR(pengiriman.date_send) = YEAR(CURRENT_DATE()) ORDER BY pengiriman.date_send DESC;")
+    data_outcome = cursor_outcome.fetchall()
+    cursor_outcome.close()
+
+    # Show total income
+    cursor_income_total = conn.cursor()
+    cursor_income_total.execute(
+        "SELECT COUNT(*) FROM pengiriman WHERE status_barang = 'masuk' AND MONTH(pengiriman.date_send) = MONTH(CURRENT_DATE()) AND YEAR(pengiriman.date_send) = YEAR(CURRENT_DATE())")
+    data_income_total = cursor_income_total.fetchall()[0][0]
+
+    # Show total outcome
+    cursor_outcome_total = conn.cursor()
+    cursor_outcome_total.execute(
+        "SELECT COUNT(*) FROM pengiriman WHERE status_barang = 'keluar' AND MONTH(pengiriman.date_send) = MONTH(CURRENT_DATE()) AND YEAR(pengiriman.date_send) = YEAR(CURRENT_DATE())")
+    data_outcome_total = cursor_outcome_total.fetchall()[0][0]
+
     if not session.get('username'):
         return redirect(url_for('login_page'))
     else:
-        return render_template('dashboard.html')
+        return render_template('dashboard.html', data_income=data_income, data_outcome=data_outcome,
+                               data_income_total=data_income_total, data_outcome_total=data_outcome_total,
+                               data_total=data_income_total + data_outcome_total)
 
 
 @app.route('/BRICASH-APP/Auth', methods=['GET', 'POST'])
@@ -239,35 +264,35 @@ def barang_masuk_page(page):
     sql_showData = None
     if _category == "tgl":
         sql_showData = "SELECT pengiriman.id_sender, pengiriman.date_send AS tanggal, vendor.id_vendor, vendor.vendor_name AS nama_vendor, pengiriman.nama_petugas AS petugas, list_barang.no_po AS surat_PO, list_barang.no_do AS surat_DO, sparepart.id_sparepart, sparepart.sparepart_name AS nama_sparepart, list_barang.serial_number AS SN, list_barang.id_list_barang FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'masuk' AND pengiriman.nama_petugas LIKE '%%' AND pengiriman.date_send LIKE '%" + \
-            _search + "%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
-            str(limit) + " OFFSET " + str(offset) + ";"
+                       _search + "%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
+                       str(limit) + " OFFSET " + str(offset) + ";"
     elif _category == "sender":
         sql_showData = "SELECT pengiriman.id_sender, pengiriman.date_send AS tanggal, vendor.id_vendor, vendor.vendor_name AS nama_vendor, pengiriman.nama_petugas AS petugas, list_barang.no_po AS surat_PO, list_barang.no_do AS surat_DO, sparepart.id_sparepart, sparepart.sparepart_name AS nama_sparepart, list_barang.serial_number AS SN, list_barang.id_list_barang FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'masuk' AND pengiriman.nama_petugas LIKE '%" + \
-            _search + "%' AND pengiriman.date_send LIKE '%""%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
-            str(limit) + " OFFSET " + str(offset) + ";"
+                       _search + "%' AND pengiriman.date_send LIKE '%""%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
+                       str(limit) + " OFFSET " + str(offset) + ";"
     elif _category == "po":
         sql_showData = "SELECT pengiriman.id_sender, pengiriman.date_send AS tanggal, vendor.id_vendor, vendor.vendor_name AS nama_vendor, pengiriman.nama_petugas AS petugas, list_barang.no_po AS surat_PO, list_barang.no_do AS surat_DO, sparepart.id_sparepart, sparepart.sparepart_name AS nama_sparepart, list_barang.serial_number AS SN, list_barang.id_list_barang FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'masuk' AND pengiriman.nama_petugas LIKE '%%' AND pengiriman.date_send LIKE '%""%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%" + \
-            _search + "%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
-            str(limit) + " OFFSET " + str(offset) + ";"
+                       _search + "%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
+                       str(limit) + " OFFSET " + str(offset) + ";"
     elif _category == "do":
         sql_showData = "SELECT pengiriman.id_sender, pengiriman.date_send AS tanggal, vendor.id_vendor, vendor.vendor_name AS nama_vendor, pengiriman.nama_petugas AS petugas, list_barang.no_po AS surat_PO, list_barang.no_do AS surat_DO, sparepart.id_sparepart, sparepart.sparepart_name AS nama_sparepart, list_barang.serial_number AS SN, list_barang.id_list_barang FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'masuk' AND pengiriman.nama_petugas LIKE '%%' AND pengiriman.date_send LIKE '%""%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%" + \
-            _search + "%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
-            str(limit) + " OFFSET " + str(offset) + ";"
+                       _search + "%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
+                       str(limit) + " OFFSET " + str(offset) + ";"
     elif _category == "sparepart":
         sql_showData = "SELECT pengiriman.id_sender, pengiriman.date_send AS tanggal, vendor.id_vendor, vendor.vendor_name AS nama_vendor, pengiriman.nama_petugas AS petugas, list_barang.no_po AS surat_PO, list_barang.no_do AS surat_DO, sparepart.id_sparepart, sparepart.sparepart_name AS nama_sparepart, list_barang.serial_number AS SN, list_barang.id_list_barang FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'masuk' AND pengiriman.nama_petugas LIKE '%%' AND pengiriman.date_send LIKE '%""%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%" + \
-            _search + "%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
-            str(limit) + " OFFSET " + str(offset) + ";"
+                       _search + "%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
+                       str(limit) + " OFFSET " + str(offset) + ";"
     elif _category == "sn":
         sql_showData = "SELECT pengiriman.id_sender, pengiriman.date_send AS tanggal, vendor.id_vendor, vendor.vendor_name AS nama_vendor, pengiriman.nama_petugas AS petugas, list_barang.no_po AS surat_PO, list_barang.no_do AS surat_DO, sparepart.id_sparepart, sparepart.sparepart_name AS nama_sparepart, list_barang.serial_number AS SN, list_barang.id_list_barang FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'masuk' AND pengiriman.nama_petugas LIKE '%%' AND pengiriman.date_send LIKE '%""%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%" + \
-            _search + "%'ORDER BY pengiriman.date_send DESC LIMIT " + \
-            str(limit) + " OFFSET " + str(offset) + ";"
+                       _search + "%'ORDER BY pengiriman.date_send DESC LIMIT " + \
+                       str(limit) + " OFFSET " + str(offset) + ";"
     elif _category == "vendor":
         sql_showData = "SELECT pengiriman.id_sender, pengiriman.date_send AS tanggal, vendor.id_vendor, vendor.vendor_name AS nama_vendor, pengiriman.nama_petugas AS petugas, list_barang.no_po AS surat_PO, list_barang.no_do AS surat_DO, sparepart.id_sparepart, sparepart.sparepart_name AS nama_sparepart, list_barang.serial_number AS SN, list_barang.id_list_barang FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'masuk' AND pengiriman.nama_petugas LIKE '%%' AND pengiriman.date_send LIKE '%""%' AND vendor.vendor_name LIKE '%" + \
-            _search + "%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
-            str(limit) + " OFFSET " + str(offset) + ";"
+                       _search + "%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
+                       str(limit) + " OFFSET " + str(offset) + ";"
     else:
         sql_showData = "SELECT pengiriman.id_sender, pengiriman.date_send AS tanggal, vendor.id_vendor, vendor.vendor_name AS nama_vendor, pengiriman.nama_petugas AS petugas, list_barang.no_po AS surat_PO, list_barang.no_do AS surat_DO, sparepart.id_sparepart, sparepart.sparepart_name AS nama_sparepart, list_barang.serial_number AS SN, list_barang.id_list_barang FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'masuk' AND pengiriman.nama_petugas LIKE '%%' AND pengiriman.date_send LIKE '%%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
-            str(limit) + " OFFSET " + str(offset) + ";"
+                       str(limit) + " OFFSET " + str(offset) + ";"
 
     cursor_showData = conn.cursor()
     cursor_showData.execute(sql_showData)
@@ -302,8 +327,6 @@ def add_data_income():
                        (_noPO.upper(), _noDO.upper(), _sparepart, _serialNumber.upper()))
         cursor.execute("COMMIT")
         conn.commit()
-    elif 'addMultiple' in request.form:
-        print('Ini tambah sekaligus')
 
     return redirect(url_for('barang_masuk_page'))
 
@@ -376,35 +399,35 @@ def barang_keluar_page(page):
     sql_showData = None
     if _category == "tgl":
         sql_showData = "SELECT pengiriman.id_sender, pengiriman.date_send, vendor.id_vendor, vendor.vendor_name, pengiriman.nama_petugas, list_barang.no_po, sparepart.id_sparepart, sparepart.sparepart_name, list_barang.serial_number, list_barang.id_list_barang, list_barang.keterangan FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'keluar' AND pengiriman.nama_petugas LIKE '%%' AND pengiriman.date_send LIKE '%" + \
-            _search + "%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
-            str(limit) + " OFFSET " + str(offset) + ";"
+                       _search + "%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
+                       str(limit) + " OFFSET " + str(offset) + ";"
     elif _category == "sender":
         sql_showData = "SELECT pengiriman.id_sender, pengiriman.date_send, vendor.id_vendor, vendor.vendor_name, pengiriman.nama_petugas, list_barang.no_po, sparepart.id_sparepart, sparepart.sparepart_name, list_barang.serial_number, list_barang.id_list_barang, list_barang.keterangan FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'keluar' AND pengiriman.nama_petugas LIKE '%" + \
-            _search + "%' AND pengiriman.date_send LIKE '%""%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
-            str(limit) + " OFFSET " + str(offset) + ";"
+                       _search + "%' AND pengiriman.date_send LIKE '%""%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
+                       str(limit) + " OFFSET " + str(offset) + ";"
     elif _category == "po":
         sql_showData = "SELECT pengiriman.id_sender, pengiriman.date_send, vendor.id_vendor, vendor.vendor_name, pengiriman.nama_petugas, list_barang.no_po, sparepart.id_sparepart, sparepart.sparepart_name, list_barang.serial_number, list_barang.id_list_barang, list_barang.keterangan FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'keluar' AND pengiriman.nama_petugas LIKE '%%' AND pengiriman.date_send LIKE '%""%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%" + \
-            _search + "%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
-            str(limit) + " OFFSET " + str(offset) + ";"
+                       _search + "%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
+                       str(limit) + " OFFSET " + str(offset) + ";"
     elif _category == "ket":
         sql_showData = "SELECT pengiriman.id_sender, pengiriman.date_send, vendor.id_vendor, vendor.vendor_name, pengiriman.nama_petugas, list_barang.no_po, sparepart.id_sparepart, sparepart.sparepart_name, list_barang.serial_number, list_barang.id_list_barang, list_barang.keterangan FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'keluar' AND pengiriman.nama_petugas LIKE '%%' AND pengiriman.date_send LIKE '%""%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.keterangan LIKE '%" + \
-            _search + "%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
-            str(limit) + " OFFSET " + str(offset) + ";"
+                       _search + "%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
+                       str(limit) + " OFFSET " + str(offset) + ";"
     elif _category == "sparepart":
         sql_showData = "SELECT pengiriman.id_sender, pengiriman.date_send, vendor.id_vendor, vendor.vendor_name, pengiriman.nama_petugas, list_barang.no_po, sparepart.id_sparepart, sparepart.sparepart_name, list_barang.serial_number, list_barang.id_list_barang, list_barang.keterangan FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'keluar' AND pengiriman.nama_petugas LIKE '%%' AND pengiriman.date_send LIKE '%""%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%" + \
-            _search + "%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
-            str(limit) + " OFFSET " + str(offset) + ";"
+                       _search + "%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
+                       str(limit) + " OFFSET " + str(offset) + ";"
     elif _category == "sn":
         sql_showData = "SELECT pengiriman.id_sender, pengiriman.date_send, vendor.id_vendor, vendor.vendor_name, pengiriman.nama_petugas, list_barang.no_po, sparepart.id_sparepart, sparepart.sparepart_name, list_barang.serial_number, list_barang.id_list_barang, list_barang.keterangan FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'keluar' AND pengiriman.nama_petugas LIKE '%%' AND pengiriman.date_send LIKE '%""%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%" + \
-            _search + "%'ORDER BY pengiriman.date_send DESC LIMIT " + \
-            str(limit) + " OFFSET " + str(offset) + ";"
+                       _search + "%'ORDER BY pengiriman.date_send DESC LIMIT " + \
+                       str(limit) + " OFFSET " + str(offset) + ";"
     elif _category == "vendor":
         sql_showData = "SELECT pengiriman.id_sender, pengiriman.date_send, vendor.id_vendor, vendor.vendor_name, pengiriman.nama_petugas, list_barang.no_po, sparepart.id_sparepart, sparepart.sparepart_name, list_barang.serial_number, list_barang.id_list_barang, list_barang.keterangan FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'keluar' AND pengiriman.nama_petugas LIKE '%%' AND pengiriman.date_send LIKE '%""%' AND vendor.vendor_name LIKE '%" + \
-            _search + "%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
-            str(limit) + " OFFSET " + str(offset) + ";"
+                       _search + "%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.no_do LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
+                       str(limit) + " OFFSET " + str(offset) + ";"
     else:
         sql_showData = "SELECT pengiriman.id_sender, pengiriman.date_send, vendor.id_vendor, vendor.vendor_name, pengiriman.nama_petugas, list_barang.no_po, sparepart.id_sparepart, sparepart.sparepart_name, list_barang.serial_number, list_barang.id_list_barang, list_barang.keterangan FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = 'keluar' AND pengiriman.nama_petugas LIKE '%%' AND pengiriman.date_send LIKE '%%' AND vendor.vendor_name LIKE '%%' AND sparepart.sparepart_name LIKE '%%' AND list_barang.no_po LIKE '%%' AND list_barang.serial_number LIKE '%%'ORDER BY pengiriman.date_send DESC LIMIT " + \
-            str(limit) + " OFFSET " + str(offset) + ";"
+                       str(limit) + " OFFSET " + str(offset) + ";"
 
     cursor_showData = conn.cursor()
     cursor_showData.execute(sql_showData)
@@ -442,6 +465,32 @@ def add_data_outcome():
     return redirect(url_for('barang_keluar_page'))
 
 
+@app.route('/BRICASH-APP/BarangKeluar/Update/<_idsender>/<_idlist>', methods=['POST'])
+def update_data_outcome(_idsender, _idlist):
+    # Update data
+    _idTemp = _idsender
+    _idTempListBarang = _idlist
+    _date = request.values.get('date_achieve')
+    _vendorName = request.values.get('vendor_name')
+    _courierName = request.values.get('courier_name')
+    _noPO = request.values.get('purchase_order')
+    _sparepart = request.values.get('sparepart_name')
+    _serialNumber = request.values.get('serial_number')
+    _keterangan = request.values.get('keterangan')
+
+    cursor = conn.cursor()
+    cursor.execute("BEGIN;")
+    cursor.execute(
+        'UPDATE list_barang SET no_po=%s, id_sparepart=%s, serial_number=%s, keterangan=%s WHERE id_list_barang=%s;',
+        (_noPO.upper(), _sparepart, _serialNumber.upper(), _keterangan, _idTempListBarang))
+    cursor.execute("UPDATE pengiriman SET id_vendor=%s, date_send=%s, nama_petugas=%s WHERE id_sender=%s;",
+                   (_vendorName, _date, _courierName, _idTemp))
+    cursor.execute("COMMIT;")
+    conn.commit()
+
+    return redirect(url_for('barang_keluar_page'))
+
+
 @app.route('/BRICASH-APP/BarangKeluar/Hapus/<_id>')
 def delete_data_outcome(_id):
     cursor = conn.cursor()
@@ -452,21 +501,45 @@ def delete_data_outcome(_id):
 
 
 @app.route('/BRICASH-APP/Report', defaults={'_btn': ''})
-@app.route('/BRICASH-APP/Report/Cat/<_btn>', methods=['GET', 'POST'])
+@app.route('/BRICASH-APP/Report/Search/<_btn>', methods=['POST'])
+@app.route('/BRICASH-APP/Report/Cat/<_btn>', methods=['GET'])
 def report_page(_btn):
     cursor = conn.cursor()
     data = None
+    global data_filter
+
+    date_start = request.values.get('date_start')
+    date_end = request.values.get('date_end')
+
     # Show data
     if _btn == "Keluar":
-        cursor.execute('SELECT pengiriman.date_send, vendor.vendor_name, pengiriman.nama_petugas, list_barang.no_po, sparepart.sparepart_name, list_barang.serial_number, list_barang.keterangan FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = "keluar" ORDER BY pengiriman.date_send DESC;')
+        cursor.execute(
+            'SELECT pengiriman.date_send, vendor.vendor_name, pengiriman.nama_petugas, list_barang.no_po, sparepart.sparepart_name, list_barang.serial_number, list_barang.keterangan FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = "keluar" ORDER BY pengiriman.date_send DESC;')
         data = cursor.fetchall()
+        data_filter = data
 
     elif _btn == "Masuk":
-        cursor.execute('SELECT pengiriman.date_send, vendor.vendor_name, pengiriman.nama_petugas, list_barang.no_po, list_barang.no_do, sparepart.sparepart_name, list_barang.serial_number, list_barang.keterangan FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor=vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender=pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart=sparepart.id_sparepart WHERE pengiriman.status_barang="masuk" ORDER BY pengiriman.date_send DESC;')
+        cursor.execute(
+            'SELECT pengiriman.date_send, vendor.vendor_name, pengiriman.nama_petugas, list_barang.no_po, list_barang.no_do, sparepart.sparepart_name, list_barang.serial_number, list_barang.keterangan FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor=vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender=pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart=sparepart.id_sparepart WHERE pengiriman.status_barang="masuk" ORDER BY pengiriman.date_send DESC;')
         data = cursor.fetchall()
+        data_filter = data
 
     else:
         return render_template('laporan.html')
+
+    if request.method == 'POST':
+        if _btn == "Masuk":
+            cursor.execute(
+                'SELECT pengiriman.date_send, vendor.vendor_name, pengiriman.nama_petugas, list_barang.no_po, list_barang.no_do, sparepart.sparepart_name, list_barang.serial_number FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = "masuk" AND pengiriman.date_send BETWEEN %s AND %s ORDER BY pengiriman.date_send DESC;',
+                (date_start, date_end))
+            data = cursor.fetchall()
+            data_filter = data
+        elif _btn == "Keluar":
+            cursor.execute(
+                'SELECT pengiriman.date_send, vendor.vendor_name, pengiriman.nama_petugas, list_barang.no_po, sparepart.sparepart_name, list_barang.serial_number, list_barang.keterangan FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = "keluar" AND pengiriman.date_send BETWEEN %s AND %s ORDER BY pengiriman.date_send DESC;',
+                (date_start, date_end))
+            data = cursor.fetchall()
+            data_filter = data
 
     if not session.get('username'):
         return redirect(url_for('login_page'))
@@ -476,17 +549,7 @@ def report_page(_btn):
 
 @app.route('/BRICASH-APP/Report/Download/<_btn>')
 def download_report(_btn):
-    cursor = conn.cursor()
-    data = None
-    if _btn == "Keluar":
-        cursor.execute('SELECT pengiriman.date_send, vendor.vendor_name, pengiriman.nama_petugas, list_barang.no_po, sparepart.sparepart_name, list_barang.serial_number, list_barang.keterangan FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor = vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender = pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart = sparepart.id_sparepart WHERE pengiriman.status_barang = "keluar" ORDER BY pengiriman.date_send DESC;')
-        data = cursor.fetchall()
-
-    elif _btn == "Masuk":
-        cursor.execute('SELECT pengiriman.date_send, vendor.vendor_name, pengiriman.nama_petugas, list_barang.no_po, list_barang.no_do, sparepart.sparepart_name, list_barang.serial_number, list_barang.keterangan FROM pengiriman INNER JOIN vendor ON pengiriman.id_vendor=vendor.id_vendor INNER JOIN list_barang ON list_barang.id_sender=pengiriman.id_sender INNER JOIN sparepart ON list_barang.id_sparepart=sparepart.id_sparepart WHERE pengiriman.status_barang="masuk" ORDER BY pengiriman.date_send DESC;')
-        data = cursor.fetchall()
-
-    rendered = render_template('pdf_template.html', data=data, btn=_btn)
+    rendered = render_template('pdf_template.html', data=data_filter, btn=_btn)
     pdf = pdfkit.from_string(rendered, False)
 
     response = make_response(pdf)

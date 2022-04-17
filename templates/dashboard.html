@@ -9,19 +9,112 @@ Dashboard
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <h1 class="text-center mx-5">Info Hari Ini</h1>
-    <table class="table table-dark table-striped w-100 p-3">
-        <thead>
-        <tr>
-            <th scope="col">No</th>
-            <th scope="col">Tanggal</th>
-            <th scope="col">Vendor</th>
-            <th scope="col">Nama Barang</th>
-            <th scope="col">No Purchase Order</th>
-            <th scope="col">Status</th>
-        </tr>
-        </thead>
-    </table>
-</div>
-{% endblock %}
+<div class="container mt-5 shadow p-3 mb-5 bg-body rounded">
+    <h1 class="text-center mt-2 mb-5">Info Bulan Ini</h1>
+
+    <div class="container mb-3 px-4">
+        <div class="row mb-5 mx-auto w-50 text-white">
+            <div class="col-sm-4">
+                <div class="card text-center bg-warning">
+                    <img src="{{ url_for('static', filename='/inbox-in.svg') }}" class="card-img-top p-5"
+                        alt="Inbox In">
+                    <div class="card-body">
+                        <p class="card-text">Barang Masuk: {{ data_income_total }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-4">
+                <div class="card text-center bg-danger">
+                    <img src="{{ url_for('static', filename='/inbox-out.svg') }}" class="card-img-top p-5"
+                        alt="Inbox Out">
+                    <div class="card-body">
+                        <p class="card-text">Barang Keluar: {{ data_outcome_total }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-4">
+                <div class="card text-center bg-success">
+                    <img src="{{ url_for('static', filename='/total.svg') }}" class="card-img-top p-5" alt="Total">
+                    <div class="card-body">
+                        <p class="card-text">Jumlah: {{ data_total }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container-fluid">
+            <p>
+                <button class="btn btn-primary" data-bs-toggle="collapse" href="#multiCollapseExample1" role="button"
+                    aria-expanded="false" aria-controls="multiCollapseExample1">Barang Masuk <i
+                        class="fa-solid fa-box"></i></button>
+                <button class="btn btn-primary float-end" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#multiCollapseExample2" aria-expanded="false"
+                    aria-controls="multiCollapseExample2">Barang Keluar <i class="fa-solid fa-box-open"></i></button>
+            </p>
+            <div class="row">
+                <div class="col">
+                    <div class="collapse multi-collapse" id="multiCollapseExample1">
+                        <h5 class="text-center">List Barang Masuk</h5>
+                        <table class="table table-dark table-responsive table-hover text-center">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Tanggal</th>
+                                    <th scope="col">Vendor</th>
+                                    <th scope="col">Pengirim</th>
+                                    <th scope="col">No PO</th>
+                                    <th scope="col">No DO</th>
+                                    <th scope="col">Sparepart</th>
+                                    <th scope="col">Serial Number</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for barangMasuk in data_income %}
+                                <tr>
+                                    <td>{{ barangMasuk[0] }}</td>
+                                    <td>{{ barangMasuk[1] }}</td>
+                                    <td>{{ barangMasuk[2] }}</td>
+                                    <td>{{ barangMasuk[3] }}</td>
+                                    <td>{{ barangMasuk[4] }}</td>
+                                    <td>{{ barangMasuk[5] }}</td>
+                                    <td>{{ barangMasuk[6] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="collapse multi-collapse" id="multiCollapseExample2">
+                        <h5 class="text-center">List Barang Keluar</h5>
+                        <table class="table table-dark table-responsive table-hover text-center">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Tanggal</th>
+                                    <th scope="col">Vendor</th>
+                                    <th scope="col">Pengirim</th>
+                                    <th scope="col">No PO</th>
+                                    <th scope="col">Sparepart</th>
+                                    <th scope="col">Serial Number</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for barangKeluar in data_outcome %}
+                                <tr>
+                                    <td>{{ barangKeluar[0] }}</td>
+                                    <td>{{ barangKeluar[1] }}</td>
+                                    <td>{{ barangKeluar[2] }}</td>
+                                    <td>{{ barangKeluar[3] }}</td>
+                                    <td>{{ barangKeluar[4] }}</td>
+                                    <td>{{ barangKeluar[5] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
