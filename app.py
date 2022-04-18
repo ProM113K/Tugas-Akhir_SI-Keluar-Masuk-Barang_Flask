@@ -114,7 +114,7 @@ def data_center_sparepart(page):
     # Show data sparepart
     cursor_show = conn.cursor()
     cursor_show.execute(
-        "SELECT * FROM sparepart ORDER BY date_createAt DESC LIMIT %s OFFSET %s", (limit, offset))
+        "SELECT * FROM sparepart ORDER BY sparepart_name ASC LIMIT %s OFFSET %s", (limit, offset))
     sparepart_data = cursor_show.fetchall()
 
     if not session.get('username'):
@@ -563,4 +563,4 @@ def download_report(_btn):
 
 
 if __name__ == '__main__':
-    app.run(host="localhost", port=3200, debug=True)
+    app.run(host="localhost", port=3200, debug=False)

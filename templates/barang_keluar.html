@@ -257,5 +257,29 @@ Barang Keluar
                 {% endfor %}
             </tbody>
         </table>
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation example" class="overflow-auto w-25 mt-4">
+            <ul class="pagination">
+                <li class="page-item">
+                    {% if prev >= 1 %}
+                    <a class="page-link" href="/BRICASH-APP/BarangKeluar/Page/{{ prev }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                    {% endif %}
+                </li>
+                {% for page in range(page) %}
+                <li class="page-item"><a class="page-link" href="/BRICASH-APP/BarangKeluar/Page/{{ loop.index }}">{{ loop.index
+                    }}</a></li>
+                {% endfor %}
+                <li class="page-item">
+                    {% if next <= page %}
+                    <a class="page-link" href="/BRICASH-APP/BarangKeluar/Page/{{ next }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a></li>
+                {% endif %}
+            </ul>
+        </nav>
     </div>
-    {% endblock %}
+</div>
+{% endblock %}
